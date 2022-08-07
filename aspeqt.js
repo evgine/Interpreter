@@ -100,7 +100,6 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
             console.log(`Syntax Error in line ${lineIdx + 1}`);
             return;
         }
-
     }
     else if (splitedLine[0] === FOR) {
         if (splitedLine.length === 10) {
@@ -154,58 +153,73 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
 
     else if (splitedLine[0] === NUM && splitedLine.length > 1
         && splitedLine[1][splitedLine[1].length - 1] === ";"
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                       
-        ) {
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
+    ) {
         if (isLocal) {
-            if(isValidVarName(splitedLine[1].split(';')[0], localVariableNames)) {
-                localVariableNames.set(splitedLine[1].split(';')[0], NUM); 
+            if (isValidVarName(splitedLine[1].split(';')[0], localVariableNames)) {
+                localVariableNames.set(splitedLine[1].split(';')[0], NUM);
             }
         }
         else {
-            if(isValidVarName(splitedLine[1].split(';')[0], variableNames)) {
-                variableNames.set(splitedLine[1].split(';')[0], NUM); 
+            if (isValidVarName(splitedLine[1].split(';')[0], variableNames)) {
+                variableNames.set(splitedLine[1].split(';')[0], NUM);
             }
         }
     }
 
     else if (splitedLine[0] === NUM && splitedLine.length > 3
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        
-        && isValidVarName(splitedLine[1], variableNames)
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && splitedLine[2] === "="
         && splitedLine[3][splitedLine[3].length - 1] === ";") {
 
         let filteredsplitedLine = splitedLine[3].split(';')[0].replace(/\./g, '');
-
-        if (isNumOrVar(filteredsplitedLine, variableNames)) {
-
-            if (isLocal) {
+        if (isLocal) {
+            if (isValidVarName(splitedLine[1], localVariableNames) && isNumOrVar(filteredsplitedLine, localVariableNames)) {
                 localVariableNames.set(splitedLine[1], NUM);
             }
             else {
-                variableNames.set(splitedLine[1], NUM);
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
             }
         }
         else {
-            console.log(`Syntax Error in line ${lineIdx + 1}`);
-            return;
+            if (isValidVarName(splitedLine[1], variableNames) && isNumOrVar(filteredsplitedLine, variableNames)) {
+                variableNames.set(splitedLine[1], NUM);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
     }
 
     else if (splitedLine[0] === NUM && splitedLine.length > 5
         && !(/^[0-9]+$/.test(splitedLine[1][0]))
-        && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
-        && isNumOrVar(splitedLine[3], variableNames)
         && ((splitedLine[4] === ADD) || (splitedLine[4] === SUB) || (splitedLine[4] === DIV) || (splitedLine[4] === MUL))
-        && isNumOrVar(splitedLine[5].split(';')[0], variableNames)
         && splitedLine[5][splitedLine[5].length - 1] === ";"
     ) {
-
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], NUM);
+            if (isValidVarName(splitedLine[1], localVariableNames)
+                && isNumOrVar(splitedLine[3], localVariableNames)
+                && isNumOrVar(splitedLine[5].split(';')[0], localVariableNames)) {
+                localVariableNames.set(splitedLine[1], NUM);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
         else {
-            variableNames.set(splitedLine[1], NUM);
+            if (isValidVarName(splitedLine[1], variableNames)
+                && isNumOrVar(splitedLine[3], variableNames)
+                && isNumOrVar(splitedLine[5].split(';')[0], variableNames)) {
+                variableNames.set(splitedLine[1], NUM);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
     }
 
@@ -213,53 +227,85 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
         && splitedLine.length > 3
         && splitedLine[3][splitedLine[3].length - 1] === ";"
         && !(/^[0-9]+$/.test(splitedLine[1][0]))
-        && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && (splitedLine[3].split(';')[0] === "true" || splitedLine[3].split(';')[0] === "false")
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], BOOL);
+            if (isValidVarName(splitedLine[1], localVariableNames)) {
+                localVariableNames.set(splitedLine[1], BOOL);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
         else {
-            variableNames.set(splitedLine[1], BOOL);
+            if (isValidVarName(splitedLine[1], variableNames)) {
+                variableNames.set(splitedLine[1], BOOL);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
     }
 
     else if (splitedLine[0] === STR
         && splitedLine.length > 1
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))               
-        && isValidVarName(splitedLine[1], variableNames)
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && splitedLine[1][splitedLine[1].length - 1] === ";"
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1].split(";")[0], localVariableNames)) {
+                localVariableNames.set(splitedLine[1].split(";")[0], STR);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
         else {
-            variableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1].split(";")[0], variableNames)) {
+                variableNames.set(splitedLine[1].split(";")[0], STR);
+            }
+            else {
+                console.log(`Syntax Error in lineh ${lineIdx + 1}`);
+                return;
+            }
         }
     }
 
     else if (splitedLine[0] === STR
         && splitedLine.length > 3
         && !(/^[0-9]+$/.test(splitedLine[1][0]))
-        && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && splitedLine[3][splitedLine[3].length - 1] === ";"
         && splitedLine[3].split(';')[0][0] === "\""
         && splitedLine[3][splitedLine[3].length - 2] === "\""
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1], localVariableNames)) {
+                localVariableNames.set(splitedLine[1], STR);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
         else {
-            variableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1], variableNames)) {
+                variableNames.set(splitedLine[1], STR);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
     }
-    
+
     else if (splitedLine[0] === STR
         && splitedLine.length > 5
         && !(/^[0-9]+$/.test(splitedLine[1][0]))
-        && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && splitedLine[5][splitedLine[5].length - 1] === ";"
         && splitedLine[3][0] === "\""
@@ -269,19 +315,31 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
         && splitedLine[5][splitedLine[5].length - 2] === "\""
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1], localVariableNames)) {
+                localVariableNames.set(splitedLine[1], STR);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
         else {
-            variableNames.set(splitedLine[1], STR);
+            if (isValidVarName(splitedLine[1], variableNames)) {
+                variableNames.set(splitedLine[1], STR);
+            }
+            else {
+                console.log(`Syntax Error in line ${lineIdx + 1}`);
+                return;
+            }
         }
     }
 
     else if (splitedLine[0] === PRINT && splitedLine.length === 2) {
         if (splitedLine[1][splitedLine[1].length - 1] === ";") {
             if (splitedLine[1][0] === "(" && splitedLine[1][splitedLine[1].length - 2] === ")") {
-
+                
                 if (!(splitedLine[1][1] === "\"" && splitedLine[1][splitedLine[1].length - 3] === "\"")) {
-
+                    
                     if (isLocal) {
                         if (!(localVariableNames.has(splitedLine[1].split(";")[0].match(/\(([^)]+)\)/)[1]) || splitedLine === ENDL)) {
                             console.log(`None declared variable in line ${lineIdx + 1}`)
@@ -327,15 +385,14 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
                     return;
                 }
             }
+
             else if (splitedLine.length === 5) {
                 if (localVariableNames.get(splitedLine[0]) === NUM
                     && isNumOrVar(splitedLine[2], localVariableNames)
                     && isNumOrVar(splitedLine[4].split(";")[0], localVariableNames)
                     && ((splitedLine[3] === ADD) || (splitedLine[3] === SUB) || (splitedLine[3] === DIV) || (splitedLine[3] === MUL))
                 ) {
-
                     continue;
-
                 }
                 else if (localVariableNames.get(splitedLine[0]) === STR
                     && splitedLine[2][0] === "\""
@@ -386,9 +443,7 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
                     && isNumOrVar(splitedLine[4].split(";")[0], variableNames)
                     && ((splitedLine[3] === ADD) || (splitedLine[3] === SUB) || (splitedLine[3] === DIV) || (splitedLine[3] === MUL))
                 ) {
-
                     continue;
-
                 }
                 else if (variableNames.get(splitedLine[0]) === STR
                     && splitedLine[2][0] === "\""
@@ -420,11 +475,10 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
     }
 }
 
-
 let global = new Map();
 let local = new Map();
 
-function operations(line, map) {
+function operation(line, map) {
     if (line[0] === NUM) {
         if (line.length === 2) {
             map.set(line[1].split(";")[0], [NUM, undefined]);
@@ -477,7 +531,6 @@ function operations(line, map) {
                         }
                     }
                 }
-
             }
             else {
                 if (map.has(line[5].split(";")[0])) {
@@ -527,7 +580,6 @@ function operations(line, map) {
     }
 
     else if (line[0] === STR) {
-
         if (line.length === 2) {
             map.set(line[1].split(";")[0], [STR, undefined]);
         }
@@ -542,14 +594,16 @@ function operations(line, map) {
         if (line[1].split(";")[0] === ENDL) {
             console.log("\n")
         }
-        else {
+        else if(line[1][1] === "\"" && line[1][line[1].length - 3] === "\""){
             console.log(line[1].split(";")[0].match(/\(([^)]+)\)/)[1])
+        }
+        else{
+            console.log(map.get(line[1].split(";")[0].match(/\(([^)]+)\)/)[1])[1])
         }
     }
 
     else if (map.has(line[0])) {
         if (map.get(line[0])[0] === NUM) {
-
             if (line.length === 3) {
                 if (!map.has(line[2].split(";")[0])) {
                     map.set(line[0], [NUM, line[2].split(";")[0]])
@@ -558,7 +612,6 @@ function operations(line, map) {
                     map.set(line[0], [NUM, map.get(line[2].split(";")[0])[1]])
                 }
             }
-
             else if (line.length === 5) {
                 if (map.has(line[2])) {
                     if (map.has(line[4].split(";")[0])) {
@@ -590,7 +643,7 @@ function operations(line, map) {
                         if (line[3] === MUL) {
                             map.set(line[0], [NUM, Number(map.get(line[2])[1]) * Number(line[4].split(";")[0])])
                         }
-                        if (line[3] === DIV){
+                        if (line[3] === DIV) {
                             if (line[4].split(";")[0] == 0) {
                                 console.log("Illegal action ")
                             }
@@ -599,7 +652,6 @@ function operations(line, map) {
                             }
                         }
                     }
-
                 }
                 else {
                     if (map.has(line[4].split(";")[0])) {
@@ -660,24 +712,24 @@ function operations(line, map) {
 
 for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
     let splitedLine = linesOfFile[lineIdx].split(" ");
-
+    
     if (splitedLine[0] === IF) {
-
         if (global.get(splitedLine[1].match(/\(([^)]+)\)/)[1])[1] === "true") {
-            for (let i = lineIdx + 1; i < linesOfFile.length; ++i) {
-                let spLine = linesOfFile[i];
-                operations(spLine, local)
+            for (let i = lineIdx + 1;  linesOfFile[i].split(" ")[0] !== "}"; ++i) {
+                let spLine = linesOfFile[i].split(" ");
+                operation(spLine, local);
                 
-
-                if (spLine[0] === "}" && spLine.length === 1) {
-                    break;
+                if(linesOfFile[i+1][0] === "}") {
+                    lineIdx = i+2;
+                    local.clear();
                 }
-            }
-        }
-        else {
-
+            } 
         }
     }
-    operations(splitedLine, global)
-    console.log(global)
+    else if(splitedLine[0] === FOR) {
+        //to do
+    }
+    else {
+        operation(splitedLine, global);
+    }
 }
