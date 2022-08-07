@@ -1,12 +1,6 @@
-const index = require("./index");
 const fs = require("fs");
 const readlineSync = require('readline-sync');
 const { Console } = require("console");
-
-// const rl = readlineSync.createInterface({
-//     input: process.stdin,
-//     output: process.stdout
-// });
 
 const ADD = "ADD";
 const SUB = "SUB";
@@ -19,8 +13,6 @@ const STR = "STR";
 const IF = "IF";
 const FOR = "FOR";
 const PRINT = "PRINT"
-
-
 
 // Get the file name.
 const fileName = readlineSync.question("Enteer file name : ", function () {
@@ -38,30 +30,24 @@ try {
 
 // Syntax analize.
 let variableNames = new Map();
-variableNames.set("x", "BOOL")
-variableNames.set("y", "NUM")
-variableNames.set("z", "NUM")
 let localVariableNames = new Map();
-let isLocal = false;                    //սա ֆլագ է,, եթե ֆոլս է աշխատում է variableNamesի հետ
+let isLocal = false;                    
 
-
-console.log(variableNames)
 let linesOfFile = allFileContents.split(/\r?\n/);
-console.log(linesOfFile);
 
-function isNum(string) {    //stugum e tvi chisht linely,  
+function isNum(string) {    
     if ((string[0] == 0 && string.length === 1) || (/^[0-9]+$/.test(string) && string[0] != 0)) { //
         return true;
     }
     return false;
 }
-function isNumOrVar(string, map) {  //stugum e vor kam tiv lini, kam el mapum gtnvox inch vor ban
+function isNumOrVar(string, map) { 
     if (isNum(string) || (map.has(string) && map.get(string) === NUM)) {
         return true;
     }
     return false;
 }
-function isValidVarName(string, map) {// stugum e, vor baxkacac lini tareric u tveric ev chlini mapinmej
+function isValidVarName(string, map) {
     if ((/^[a-zA-Z0-9]+$/.test(string)) && !(map.has(string))) {
         return true;
     }
@@ -69,20 +55,11 @@ function isValidVarName(string, map) {// stugum e, vor baxkacac lini tareric u t
 }
 
 for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
-    // stugel ete toghy datark e anel continue
     if (linesOfFile[lineIdx].trim("").length === 0) {
         continue;
     }
     let splitedLine = linesOfFile[lineIdx].split(" ");
 
-    console.log(splitedLine)
-    //ete petq lini sa hanum e " "nery
-    // console.log(variableNames.has(splitedLine[1].match(/\(([^)]+)\)/)[1]))
-    // finnalySplitedLine = splitedLine.filter(function (str) {
-    //     return /\S/.test(str);
-    // })
-
-    //for IF
     if (splitedLine[0] === IF) {
         if (splitedLine.length === 3) {
             if (splitedLine[1][0] === "(" && splitedLine[1][splitedLine[1].length - 1] === ")") {
@@ -174,38 +151,35 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
             return;
         }
     }
-    //NUM x;  այս դեպքը ճիշտ է
 
     else if (splitedLine[0] === NUM && splitedLine.length > 1
         && splitedLine[1][splitedLine[1].length - 1] === ";"
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                       //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))                       
         ) {
         if (isLocal) {
             if(isValidVarName(splitedLine[1].split(';')[0], localVariableNames)) {
-                localVariableNames.set(splitedLine[1].split(';')[0], NUM); //սեթի մեջ ավելացրու
+                localVariableNames.set(splitedLine[1].split(';')[0], NUM); 
             }
         }
         else {
             if(isValidVarName(splitedLine[1].split(';')[0], variableNames)) {
-                variableNames.set(splitedLine[1].split(';')[0], NUM); //սեթի մեջ ավելացրու
+                variableNames.set(splitedLine[1].split(';')[0], NUM); 
             }
         }
     }
 
-
-    //NUM x = 7;
     else if (splitedLine[0] === NUM && splitedLine.length > 3
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        
         && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && splitedLine[3][splitedLine[3].length - 1] === ";") {
 
         let filteredsplitedLine = splitedLine[3].split(';')[0].replace(/\./g, '');
 
-        if (isNumOrVar(filteredsplitedLine, variableNames)) { //ստուգում է արդյոք մենակ թվերից է բաղկացած թե ոչ և զրոյով չսկսվի
+        if (isNumOrVar(filteredsplitedLine, variableNames)) {
 
             if (isLocal) {
-                localVariableNames.set(splitedLine[1], NUM); //սեթի մեջ ավելացրու, այստեղ հարց. վելյուն բա՞
+                localVariableNames.set(splitedLine[1], NUM);
             }
             else {
                 variableNames.set(splitedLine[1], NUM);
@@ -217,7 +191,6 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
         }
     }
 
-    //NUM barevv = x + y;
     else if (splitedLine[0] === NUM && splitedLine.length > 5
         && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && isValidVarName(splitedLine[1], variableNames)
@@ -229,51 +202,46 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
     ) {
 
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], NUM); //սեթի մեջ ավելացրու
+            localVariableNames.set(splitedLine[1], NUM);
         }
         else {
             variableNames.set(splitedLine[1], NUM);
         }
-
-
     }
 
-
-    //BOOL x = true; ||  BOOL x = false;
     else if (splitedLine[0] === BOOL
         && splitedLine.length > 3
         && splitedLine[3][splitedLine[3].length - 1] === ";"
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))            //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && (splitedLine[3].split(';')[0] === "true" || splitedLine[3].split(';')[0] === "false")
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], BOOL); //սեթի մեջ ավելացրու, այստեղ հարց. վելյուն բա՞
+            localVariableNames.set(splitedLine[1], BOOL);
         }
         else {
             variableNames.set(splitedLine[1], BOOL);
         }
     }
 
-    //STR x;
     else if (splitedLine[0] === STR
         && splitedLine.length > 1
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))               
         && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[1][splitedLine[1].length - 1] === ";"
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR); //սեթի մեջ ավելացրու, այստեղ հարց. վելյուն բա՞
+            localVariableNames.set(splitedLine[1], STR);
         }
         else {
             variableNames.set(splitedLine[1], STR);
         }
     }
-    //STR x = "kgh";
+
     else if (splitedLine[0] === STR
         && splitedLine.length > 3
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && splitedLine[3][splitedLine[3].length - 1] === ";"
@@ -281,17 +249,16 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
         && splitedLine[3][splitedLine[3].length - 2] === "\""
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR); //սեթի մեջ ավելացրու, այստեղ հարց. վելյուն բա՞
+            localVariableNames.set(splitedLine[1], STR);
         }
         else {
             variableNames.set(splitedLine[1], STR);
         }
     }
-
-    //STR x = "kgh" ADD "hvbj";
+    
     else if (splitedLine[0] === STR
         && splitedLine.length > 5
-        && !(/^[0-9]+$/.test(splitedLine[1][0]))                        //որ փոփոխականը թվով չսկսվի
+        && !(/^[0-9]+$/.test(splitedLine[1][0]))
         && isValidVarName(splitedLine[1], variableNames)
         && splitedLine[2] === "="
         && splitedLine[5][splitedLine[5].length - 1] === ";"
@@ -302,14 +269,14 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
         && splitedLine[5][splitedLine[5].length - 2] === "\""
     ) {
         if (isLocal) {
-            localVariableNames.set(splitedLine[1], STR); //սեթի մեջ ավելացրու, այստեղ հարց. վելյուն բա՞
+            localVariableNames.set(splitedLine[1], STR);
         }
         else {
             variableNames.set(splitedLine[1], STR);
         }
     }
 
-    else if (splitedLine[0] === PRINT && splitedLine.length === 2) { // aystex verjin probelnery hanir size === 2 petqa lini
+    else if (splitedLine[0] === PRINT && splitedLine.length === 2) {
         if (splitedLine[1][splitedLine[1].length - 1] === ";") {
             if (splitedLine[1][0] === "(" && splitedLine[1][splitedLine[1].length - 2] === ")") {
 
@@ -333,23 +300,6 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
             return;
         }
     }
-
-    // else if (splitedLine[0] === INPUT && splitedLine.length === 2) { // aystex verjin probelnery hanir size === 2 petqa lini
-    //     if (splitedLine[1][splitedLine[1].length - 1] === ";") {
-
-    //         if (isLocal) {
-    //             if (!localVariableNames.has(splitedLine[1].split(";")[0])) {
-    //                 console.log(`None declared variable in line ${lineIdx + 1}`)
-    //             }
-    //         }
-    //         else {
-    //             if (!variableNames.has(splitedLine[1].split(";")[0])) {
-    //                 console.log(`None declared variable in line ${lineIdx + 1}`)
-    //             }
-    //         }
-    //     }
-    // }
-    //x = y; 
 
     else if (splitedLine[1] === "="
         && splitedLine[splitedLine.length - 1][splitedLine[splitedLine.length - 1].length - 1] === ";") {
@@ -377,7 +327,6 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
                     return;
                 }
             }
-            //x = y - z;
             else if (splitedLine.length === 5) {
                 if (localVariableNames.get(splitedLine[0]) === NUM
                     && isNumOrVar(splitedLine[2], localVariableNames)
@@ -461,28 +410,21 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
             }
         }
     }
-
     else if (isLocal && (splitedLine[0] === "}" && splitedLine.length === 1)) {
         isLocal = false;
         localVariableNames.clear();
     }
-
     else {
         console.log(`Syntax Error in line ${lineIdx + 1}`);
         return;
     }
-
-
 }
-
 
 
 let global = new Map();
 let local = new Map();
-//NUM x;
-//NUM x = 10; NUM x = x;
-//NUM k = x ADD y;
-function operation(line, map) {
+
+function operations(line, map) {
     if (line[0] === NUM) {
         if (line.length === 2) {
             map.set(line[1].split(";")[0], [NUM, undefined]);
@@ -527,7 +469,6 @@ function operation(line, map) {
                         map.set(line[1], [NUM, Number(map.get(line[3])[1]) * Number(line[5].split(";")[0])])
                     }
                     if (line[4] === DIV) {
-                        // console.log(map.get(line[5].split(";")[0])[1])
                         if (line[5].split(";")[0] == 0) {
                             console.log("Illegal action ")
                         }
@@ -569,7 +510,6 @@ function operation(line, map) {
                         map.set(line[1], [NUM, Number(line[3]) * Number(line[5].split(";")[0])])
                     }
                     if (line[4] === DIV) {
-                        // console.log(map.get(line[5].split(";")[0])[1])
                         if (line[5].split(";")[0] == 0) {
                             console.log("Illegal action ")
                         }
@@ -581,14 +521,11 @@ function operation(line, map) {
             }
         }
     }
-    //BOOL x = true;
-    //BOOL x = false;
+
     else if (line[0] === BOOL) {
         map.set(line[1], [BOOL, line[3].split(";")[0]])
     }
-    // STR x;
-    // STR x = "hb";
-    // STR x = "ijg" ADD "HH";
+
     else if (line[0] === STR) {
 
         if (line.length === 2) {
@@ -609,10 +546,7 @@ function operation(line, map) {
             console.log(line[1].split(";")[0].match(/\(([^)]+)\)/)[1])
         }
     }
-    // else if (line[0] === INPUT) {
 
-    // }
-    //x = y; x = 4;
     else if (map.has(line[0])) {
         if (map.get(line[0])[0] === NUM) {
 
@@ -624,7 +558,7 @@ function operation(line, map) {
                     map.set(line[0], [NUM, map.get(line[2].split(";")[0])[1]])
                 }
             }
-            //x = x + y;
+
             else if (line.length === 5) {
                 if (map.has(line[2])) {
                     if (map.has(line[4].split(";")[0])) {
@@ -656,8 +590,7 @@ function operation(line, map) {
                         if (line[3] === MUL) {
                             map.set(line[0], [NUM, Number(map.get(line[2])[1]) * Number(line[4].split(";")[0])])
                         }
-                        if (line[3] === DIV) {
-                            // console.log(map.get(line[5].split(";")[0])[1])
+                        if (line[3] === DIV){
                             if (line[4].split(";")[0] == 0) {
                                 console.log("Illegal action ")
                             }
@@ -728,13 +661,12 @@ function operation(line, map) {
 for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
     let splitedLine = linesOfFile[lineIdx].split(" ");
 
-    // IF () {}
     if (splitedLine[0] === IF) {
 
         if (global.get(splitedLine[1].match(/\(([^)]+)\)/)[1])[1] === "true") {
             for (let i = lineIdx + 1; i < linesOfFile.length; ++i) {
                 let spLine = linesOfFile[i];
-                operation(spLine, local)
+                operations(spLine, local)
                 
 
                 if (spLine[0] === "}" && spLine.length === 1) {
@@ -746,7 +678,6 @@ for (let lineIdx = 0; lineIdx < linesOfFile.length; ++lineIdx) {
 
         }
     }
-    operation(splitedLine, global)
+    operations(splitedLine, global)
     console.log(global)
-    console.log(local)
 }
