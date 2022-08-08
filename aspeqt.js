@@ -574,11 +574,9 @@ function operation(line, map) {
             }
         }
     }
-
     else if (line[0] === BOOL) {
         map.set(line[1], [BOOL, line[3].split(";")[0]])
     }
-
     else if (line[0] === STR) {
         if (line.length === 2) {
             map.set(line[1].split(";")[0], [STR, undefined]);
